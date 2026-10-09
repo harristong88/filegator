@@ -6,7 +6,10 @@
       </p>
     </header>
     <section class="modal-card-body">
-      <form @submit="save">
+      <p v-if="!$store.state.config.auth.passwordChanges">
+        Sign-in is managed by {{ $store.state.config.auth.provider }}.
+      </p>
+      <form v-else @submit="save">
         <b-field :label="lang('Old password')" :type="formErrors.oldpassword ? 'is-danger' : ''" :message="formErrors.oldpassword">
           <b-input v-model="oldpassword" password-reveal required @keydown.native="formErrors.oldpassword = ''" />
         </b-field>
@@ -20,7 +23,7 @@
       <button class="button" type="button" @click="$parent.close()">
         {{ lang('Close') }}
       </button>
-      <button class="button is-primary" type="button" @click="save">
+      <button v-if="$store.state.config.auth.passwordChanges" class="button is-primary" type="button" @click="save">
         {{ lang('Save') }}
       </button>
     </footer>

@@ -27,7 +27,7 @@
             <b-input v-model="formFields.name" @keydown.native="formErrors.name = ''" />
           </b-field>
 
-          <b-field :label="lang('Password')" :type="formErrors.password ? 'is-danger' : ''" :message="formErrors.password">
+          <b-field v-if="$store.state.config.auth.passwordChanges" :label="lang('Password')" :type="formErrors.password ? 'is-danger' : ''" :message="formErrors.password">
             <b-input v-model="formFields.password" :placeholder="action == 'edit' ? lang('Leave blank for no change') : ''" password-reveal @keydown.native="formErrors.password = ''" />
           </b-field>
         </div>

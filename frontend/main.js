@@ -47,18 +47,18 @@ new Vue({
             this.$store.commit('setUser', user)
             this.$router.push('/').catch(() => {})
           })
-          .catch(() => {
+          .catch(error => {
             this.$notification.open({
-              message: this.lang('Something went wrong'),
+              message: ({401: 'Your identity could not be verified. Sign in again.', 403: 'Your account or request is unavailable. Reload the page or contact the administrator.', 503: 'Authentication is temporarily unavailable. Try again shortly.'})[error.response && error.response.status] || this.lang('Something went wrong'),
               type: 'is-danger',
               queue: false,
               indefinite: true,
             })
           })
       })
-      .catch(() => {
+      .catch(error => {
         this.$notification.open({
-          message: this.lang('Something went wrong'),
+          message: ({401: 'Your identity could not be verified. Sign in again.', 403: 'Your account or request is unavailable. Reload the page or contact the administrator.', 503: 'Authentication is temporarily unavailable. Try again shortly.'})[error.response && error.response.status] || this.lang('Something went wrong'),
           type: 'is-danger',
           queue: false,
           indefinite: true,

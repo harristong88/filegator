@@ -19,6 +19,7 @@ export default new Router({
       path: '/login',
       name: 'login',
       component: Login,
+      beforeEnter: (to, from, next) => next(store.state.config.auth.passwordLogin ? undefined : '/'),
     },
     {
       path: '/users',

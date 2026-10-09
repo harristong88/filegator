@@ -17,10 +17,10 @@
         <a v-if="is('admin')" class="navbar-item files" @click="$router.push('/').catch(() => {})">
           {{ lang('Files') }}
         </a>
-        <a v-if="is('admin')" class="navbar-item users" @click="$router.push('/users').catch(() => {})">
+        <a v-if="is('admin') && $store.state.config.auth.accountManagement" class="navbar-item users" @click="$router.push('/users').catch(() => {})">
           {{ lang('Users') }}
         </a>
-        <a v-if="is('guest')" class="navbar-item login" @click="login">
+        <a v-if="is('guest') && $store.state.config.auth.passwordLogin" class="navbar-item login" @click="login">
           {{ lang('Login') }}
         </a>
         <a v-if="!is('guest')" class="navbar-item profile" @click="profile">
@@ -54,6 +54,10 @@ export default {
     logout() {
       api.logout()
         .then(() => {
+          if (this.$store.state.config.auth.logoutUrl) {
+            window.location.assign(this.$store.state.config.auth.logoutUrl)
+            return
+          }
           this.$store.commit('initialize')
           api.getUser()
             .then(user => {

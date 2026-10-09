@@ -11,6 +11,8 @@
 namespace Filegator\Controllers;
 
 use Filegator\Config\Config;
+use Filegator\Services\Auth\AuthInterface;
+use Filegator\Services\Auth\AuthCapabilities;
 use Filegator\Kernel\Response;
 use Filegator\Services\View\ViewInterface;
 
@@ -21,8 +23,8 @@ class ViewController
         return $response->html($view->getIndexPage());
     }
 
-    public function getFrontendConfig(Response $response, Config $config)
+    public function getFrontendConfig(Response $response, Config $config, AuthInterface $auth)
     {
-        return $response->json($config->get('frontend_config'));
+        return $response->json(array_replace($config->get('frontend_config'), ['auth' => AuthCapabilities::for($auth)]));
     }
 }

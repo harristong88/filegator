@@ -123,3 +123,7 @@ https://github.com/filegator/filegator/security/advisories
 Copyright (c) 2019 [Milos Stojanovic](https://github.com/alcalbg).
 
 This project is MIT licensed.
+
+## External identity in this fork
+
+This fork can use Cloudflare Access through the Composer package `cf-access/auth` v0.3.0. FileGator owns accounts, permissions, homes, sessions, and administration; the installed package verifies identity only. See [external authentication setup and migration](docs/external-auth.md). The Docker image selects external authentication and requires deployment environment settings. Legacy adapters remain available for local-mode deployments.

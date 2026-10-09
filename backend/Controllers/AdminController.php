@@ -13,6 +13,8 @@ namespace Filegator\Controllers;
 use Filegator\Kernel\Request;
 use Filegator\Kernel\Response;
 use Filegator\Services\Auth\AuthInterface;
+use Filegator\Services\Auth\AuthCapabilities;
+use Filegator\Services\Auth\External\AuthenticationException;
 use Filegator\Services\Auth\User;
 use Filegator\Services\Storage\Filesystem;
 use Rakit\Validation\Validator;
@@ -36,12 +38,15 @@ class AdminController
 
     public function storeUser(User $user, Request $request, Response $response, Validator $validator)
     {
+        if (!AuthCapabilities::for($this->auth)['passwordChanges'] && $request->input('password', '') !== '') {
+            throw new AuthenticationException('PASSWORD_DISABLED', 403);
+        }
         $validator->setMessage('required', 'This field is required');
         $validation = $validator->validate($request->all(), [
             'name' => 'required',
             'username' => 'required',
             'homedir' => 'required',
-            'password' => 'required',
+            'password' => AuthCapabilities::for($this->auth)['passwordLogin'] ? 'required' : 'nullable',
         ]);
 
         if ($validation->fails()) {
@@ -58,14 +63,19 @@ class AdminController
             $user->setName($request->input('name'));
             $user->setUsername($request->input('username'));
             $user->setHomedir(
-                rtrim($this->auth->user()->getHomeDir(), $this->storage->getSeparator())
+                rtrim(AuthCapabilities::for($this->auth)['externalIdentity'] ? '/' : $this->auth->user()->getHomeDir(), $this->storage->getSeparator())
                 . $this->storage->getSeparator()
                 . ltrim($request->input('homedir'), $this->storage->getSeparator())
             );
             $user->setRole($request->input('role', 'user'));
             $user->setPermissions($request->input('permissions'));
-            $ret = $this->auth->add($user, $request->input('password'));
+            $ret = $this->auth->add($user, $request->input('password', ''));
+        } catch (AuthenticationException $e) {
+            throw $e;
         } catch (\Exception $e) {
+            if (AuthCapabilities::for($this->auth)['externalIdentity'] && !$e instanceof \InvalidArgumentException && get_class($e) !== \Exception::class) {
+                throw $e;
+            }
             return $response->json($e->getMessage(), 422);
         }
 
@@ -80,6 +90,9 @@ class AdminController
             return $response->json('User not found', 422);
         }
 
+        if (!AuthCapabilities::for($this->auth)['passwordChanges'] && $request->input('password', '') !== '') {
+            throw new AuthenticationException('PASSWORD_DISABLED', 403);
+        }
         $validator->setMessage('required', 'This field is required');
         $validation = $validator->validate($request->all(), [
             'name' => 'required',
@@ -105,7 +118,12 @@ class AdminController
             $user->setPermissions($request->input('permissions'));
 
             return $response->json($this->auth->update($username, $user, $request->input('password', '')));
+        } catch (AuthenticationException $e) {
+            throw $e;
         } catch (\Exception $e) {
+            if (AuthCapabilities::for($this->auth)['externalIdentity'] && !$e instanceof \InvalidArgumentException && get_class($e) !== \Exception::class) {
+                throw $e;
+            }
             return $response->json($e->getMessage(), 422);
         }
     }
@@ -118,6 +136,10 @@ class AdminController
             return $response->json('User not found', 422);
         }
 
-        return $response->json($this->auth->delete($user));
+        try {
+            return $response->json($this->auth->delete($user));
+        } catch (\InvalidArgumentException $e) {
+            return $response->json($e->getMessage(), 422);
+        }
     }
 }

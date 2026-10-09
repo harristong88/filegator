@@ -1,6 +1,9 @@
 <template>
   <div v-if="$store.state.initialized" id="wrapper">
-    <Login v-if="is('guest') && ! can('write') && ! can('read') && ! can('upload')" />
+    <p v-if="!$store.state.config.auth.guests && is('guest')">
+      Your local account is unavailable. Reload the page or contact the administrator.
+    </p>
+    <Login v-else-if="is('guest') && ! can('write') && ! can('read') && ! can('upload')" />
     <div v-else id="inner">
       <router-view />
     </div>

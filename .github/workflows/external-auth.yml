@@ -1,0 +1,38 @@
+name: External identity
+on: [push, pull_request]
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, openssl, pdo_sqlite, mbstring, zip
+      - run: composer install --no-interaction
+      - run: CYPRESS_INSTALL_BINARY=0 npm ci --legacy-peer-deps --ignore-scripts
+      - run: npm run lint
+      - run: NODE_OPTIONS=--openssl-legacy-provider npm run build
+      - run: php tests/external/integration.php
+      - run: npx playwright install --with-deps chromium
+      - name: Start fixture server
+        run: |
+          mkdir -p /tmp/filegator-test-storage
+          CF_TEAM_DOMAIN=https://fixture.cloudflareaccess.com CF_ACCESS_AUD=test-audience CF_ADMIN_EMAILS=alice@example.com CF_CSRF_KEY=test-only-csrf FILEGATOR_PRIVATE_ROOT=/tmp/filegator-test-private FILEGATOR_STORAGE_ROOT=/tmp/filegator-test-storage php -d display_errors=0 -S 127.0.0.1:8088 -t dist tests/external/server.php > /tmp/filegator-fixture.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -s http://127.0.0.1:8088/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - run: node tests/external/browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: external-auth-evidence
+          path: |
+            .artifacts/
+            /tmp/filegator-fixture.log

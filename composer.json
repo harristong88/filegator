@@ -19,7 +19,9 @@
         "rakit/validation": "^1.1",
         "league/flysystem": "^1.1",
         "league/flysystem-ziparchive": "^1.0",
-        "symfony/mime": "^5.4"
+        "symfony/mime": "^5.4",
+        "cf-access/auth": "0.3.0",
+        "ext-pdo_sqlite": "*"
     },
     "authors": [
         {
@@ -43,5 +45,18 @@
         "league/flysystem-memory": "^1.0",
         "phpstan/phpstan": "^2.0.3",
         "php-cs-fixer/shim": "^3.95"
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/harristong88/cf-access-auth.git",
+            "only": [
+                "cf-access/auth"
+            ]
+        }
+    ],
+    "bin": [
+        "bin/import-users",
+        "bin/account"
+    ]
 }

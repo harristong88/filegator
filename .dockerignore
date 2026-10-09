@@ -1,0 +1,17 @@
+.git
+node_modules
+vendor
+configuration.php
+.artifacts
+private/*
+!private/.htaccess
+!private/users.json.blank
+!private/logs
+private/logs/*
+repository/*
+!repository/.gitignore
+.env*
+.phpunit.result.cache
+dist/css
+dist/js
+dist/main.html

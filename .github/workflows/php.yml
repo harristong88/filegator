@@ -19,7 +19,7 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php-version }}
-        extensions: mbstring, zip, sqlite3, filter
+        extensions: mbstring, zip, sqlite3, pdo_sqlite, curl, openssl, filter
         coverage: xdebug
 
     - name: Install dependencies
@@ -30,6 +30,9 @@ jobs:
 
     - name: Execute tests
       run: XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-clover=coverage.xml
+
+    - name: External authentication checks
+      run: php tests/external/accounts.php && php tests/external/integration.php
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

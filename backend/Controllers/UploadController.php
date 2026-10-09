@@ -44,7 +44,7 @@ class UploadController
         $file_name = $request->input('resumableFilename', 'file');
         $identifier = (string) preg_replace('/[^0-9a-zA-Z_]/', '', (string) $request->input('resumableIdentifier'));
         $username = $this->auth->user() ? $this->auth->user()->getUsername() : 'guest';
-        $clean_username = (string) preg_replace('/[^0-9a-zA-Z_]/', '', $username);
+        $clean_username = hash('sha256', $username . "\0" . $request->getSession()->getId());
         $chunk_number = (int) $request->input('resumableChunkNumber');
 
         $chunk_file = 'multipart_' . $clean_username . '_' . $identifier . '_' . $file_name . '.part' . $chunk_number;
@@ -53,7 +53,8 @@ class UploadController
             return $response->json('Chunk exists', 200);
         }
 
-        return $response->json('Chunk does not exists', 204);
+        $response->setStatusCode(204);
+        $response->setContent('');
     }
 
     public function upload(Request $request, Response $response)
@@ -65,7 +66,7 @@ class UploadController
         $total_size = (int) $request->input('resumableTotalSize');
         $identifier = (string) preg_replace('/[^0-9a-zA-Z_]/', '', (string) $request->input('resumableIdentifier'));
         $username = $this->auth->user() ? $this->auth->user()->getUsername() : 'guest';
-        $clean_username = (string) preg_replace('/[^0-9a-zA-Z_]/', '', $username);
+        $clean_username = hash('sha256', $username . "\0" . $request->getSession()->getId());
 
         $filebag = $request->files;
         $file = $filebag->get('file');
