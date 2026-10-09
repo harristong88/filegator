@@ -3,7 +3,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git unzip libzi
 RUN docker-php-ext-configure ldap --with-libdir=lib/$(dpkg-architecture --query DEB_HOST_MULTIARCH)/ && docker-php-ext-install zip curl mbstring pdo_sqlite ldap mysqli
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
-FROM node:22-bookworm-slim AS frontend-builder
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS frontend-builder
 WORKDIR /build
 COPY package.json package-lock.json ./
 RUN CYPRESS_INSTALL_BINARY=0 npm ci --legacy-peer-deps --ignore-scripts

@@ -29,7 +29,7 @@ if (! $externalAuth && ! file_exists(__DIR__ . '/../configuration.php')) {
 require __DIR__ . '/../vendor/autoload.php';
 
 if (! defined('APP_ENV')) {
-    define('APP_ENV', 'production');
+    define('APP_ENV', getenv('FILEGATOR_ENV') === 'development' ? 'development' : 'production');
 }
 
 if (! defined('APP_PUBLIC_PATH')) {

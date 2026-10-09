@@ -4,7 +4,7 @@ FileGator owns accounts and authorization. The Composer package `cf-access/auth`
 
 ## Install and configure
 
-Run `composer install` and `CYPRESS_INSTALL_BINARY=0 npm ci --legacy-peer-deps --ignore-scripts`, then `NODE_OPTIONS=--openssl-legacy-provider npm run build`. PHP 8.1+ requires curl, OpenSSL, mbstring, PDO SQLite, and FileGator's existing zip extension. Node 22 is the supported build runtime.
+Run `composer install` and `CYPRESS_INSTALL_BINARY=0 npm ci --legacy-peer-deps --ignore-scripts`, then `NODE_OPTIONS=--openssl-legacy-provider npm run build`. PHP 8.1+ requires curl, OpenSSL, mbstring, PDO SQLite, and FileGator's existing zip extension. Node 22 is the supported build runtime. The development server also serves only dist/; its explicit FILEGATOR_ENV=development setting preserves the existing development CORS behavior. Dockerfile.multiarch points to the shared production Dockerfile so it cannot silently build upstream assets.
 
 Set these environment variables in the PHP worker/container environment:
 

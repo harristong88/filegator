@@ -34,10 +34,7 @@ $external = [
     'Filegator\Services\Auth\External\IdentityProviderInterface' => [
         'handler' => '\\Filegator\Services\Auth\External\CloudflareIdentityProvider',
         'config' => ['teamDomain' => $required('CF_TEAM_DOMAIN'), 'audience' => $required('CF_ACCESS_AUD'),
-            'cacheDirectory' => $private . '/cf-access-cache',
-            'onDiagnostic' => static function (array $event): void {
-                error_log(json_encode($event));
-            }],
+            'cacheDirectory' => $private . '/cf-access-cache'],
     ],
     'Filegator\Services\Auth\External\AccountRepositoryInterface' => [
         'handler' => '\\Filegator\Services\Auth\External\LocalAccounts',
