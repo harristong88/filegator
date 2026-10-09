@@ -11,6 +11,7 @@
 namespace Filegator\Services\Security;
 
 use Filegator\Kernel\Request;
+use Filegator\Services\Auth\External\AuthenticationException;
 use Filegator\Kernel\Response;
 use Filegator\Services\Service;
 use Filegator\Services\Logger\LoggerInterface;
@@ -51,7 +52,7 @@ class Security implements Service
 
                 if (! $csrfManager->isTokenValid($token)) {
                     $this->logger->log("Csrf token not valid");
-                    die;
+                    throw new AuthenticationException('CSRF_INVALID', 403);
                 }
             }
         }

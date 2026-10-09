@@ -14,6 +14,8 @@ use Filegator\Config\Config;
 use Filegator\Kernel\Request;
 use Filegator\Kernel\Response;
 use Filegator\Services\Auth\AuthInterface;
+use Filegator\Services\Auth\AuthCapabilities;
+use Filegator\Services\Auth\External\AuthenticationException;
 use Filegator\Services\Tmpfs\TmpfsInterface;
 use Filegator\Services\Logger\LoggerInterface;
 use Rakit\Validation\Validator;
@@ -29,6 +31,9 @@ class AuthController
 
     public function login(Request $request, Response $response, AuthInterface $auth, TmpfsInterface $tmpfs, Config $config)
     {
+        if (!AuthCapabilities::for($auth)['passwordLogin']) {
+            throw new AuthenticationException('PASSWORD_DISABLED', 403);
+        }
         $username = (string) $request->input('username');
         $password = (string) $request->input('password');
         $ip = $request->getClientIp();
@@ -76,6 +81,9 @@ class AuthController
 
     public function changePassword(Request $request, Response $response, AuthInterface $auth, Validator $validator)
     {
+        if (!AuthCapabilities::for($auth)['passwordChanges']) {
+            throw new AuthenticationException('PASSWORD_DISABLED', 403);
+        }
         $validator->setMessage('required', 'This field is required');
         $validation = $validator->validate($request->all(), [
             'oldpassword' => 'required',

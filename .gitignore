@@ -36,3 +36,7 @@ tags
 # PHP CS Fixer configuration
 /.php-cs-fixer.cache
 /.php-cs-fixer.php
+
+/.artifacts/
+/private/accounts.sqlite*
+/private/cf-access-cache/

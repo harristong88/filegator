@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libldap2-dev \
     libzip-dev \
+    libcurl4-openssl-dev \
+    libonig-dev \
+    libsqlite3-dev \
     ca-certificates \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
@@ -18,8 +21,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions
-RUN docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ \
-    && docker-php-ext-install zip ldap mysqli
+RUN docker-php-ext-configure ldap --with-libdir=lib/$(dpkg-architecture --query DEB_HOST_MULTIARCH)/ \
+    && docker-php-ext-install zip curl mbstring pdo_sqlite ldap mysqli
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
@@ -40,9 +43,10 @@ USER app
 
 # Install dependencies as non-root
 RUN composer install
-RUN npm ci
+RUN CYPRESS_INSTALL_BINARY=0 npm ci --legacy-peer-deps --ignore-scripts
 
 # Dev config
 RUN cp -n configuration_sample.php configuration.php || true
 
+ENV FILEGATOR_AUTH_MODE=external
 CMD ["npm", "run", "serve"]

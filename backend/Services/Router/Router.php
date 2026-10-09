@@ -11,6 +11,8 @@
 namespace Filegator\Services\Router;
 
 use FastRoute;
+use Filegator\Services\Auth\AuthCapabilities;
+use Filegator\Services\Auth\External\AuthenticationException;
 use Filegator\Container\Container;
 use Filegator\Kernel\Request;
 use Filegator\Services\Auth\AuthInterface;
@@ -26,9 +28,12 @@ class Router implements Service
 
     protected $user;
 
+    protected $capabilities;
+
     public function __construct(Request $request, AuthInterface $auth, Container $container)
     {
         $this->request = $request;
+        $this->capabilities = AuthCapabilities::for($auth);
         $this->container = $container;
         $this->user = $auth->user() ?: $auth->getGuest();
     }
@@ -43,6 +48,12 @@ class Router implements Service
             $uri = rawurldecode($r);
         }
 
+        if (($uri === '/login' && !$this->capabilities['passwordLogin']) || ($uri === '/changepassword' && !$this->capabilities['passwordChanges'])) {
+            throw new AuthenticationException('PASSWORD_DISABLED', 403);
+        }
+        if (preg_match('#^/(listusers|storeuser|updateuser|deleteuser)(/|$)#', $uri) && !$this->capabilities['accountManagement']) {
+            throw new AuthenticationException('ACCOUNT_MANAGEMENT_DISABLED', 403);
+        }
         $routes = require $config['routes_file'];
 
         $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) use ($routes) {

@@ -1,0 +1,29 @@
+#!/usr/bin/env php
+<?php
+
+use Filegator\Services\Auth\External\AccountStore;
+
+require dirname(__DIR__) . '/vendor/autoload.php';
+$options = getopt('', ['database:', 'username:', 'disable', 'enable', 'relink', 'issuer:', 'subject:']);
+try {
+    if (!isset($options['database'], $options['username']) || count(array_intersect(['disable', 'enable', 'relink'], array_keys($options))) !== 1) {
+        throw new InvalidArgumentException('Usage: account --database=... --username=... --disable|--enable|--relink [--issuer=... --subject=...]');
+    }
+    if (!is_file($options['database'])) {
+        throw new InvalidArgumentException('Account database does not exist');
+    }
+    $store = new AccountStore($options['database']);
+    if (isset($options['disable'])) {
+        $store->disable($options['username']);
+    }
+    if (isset($options['enable'])) {
+        $store->enable($options['username']);
+    }
+    if (isset($options['relink'])) {
+        $store->relink($options['username'], $options['issuer'] ?? '', $options['subject'] ?? '');
+    }
+    echo "Account updated\n";
+} catch (Throwable $error) {
+    fwrite(STDERR, $error->getMessage() . "\n");
+    exit(1);
+}

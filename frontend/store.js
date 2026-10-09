@@ -10,6 +10,7 @@ export default new Vuex.Store({
     initialized: false,
     config: {
       pagination: ['', 5, 10, 15],
+      auth: { passwordLogin: true, passwordChanges: true, guests: true, accountManagement: true, provider: 'Local account', logoutUrl: '' },
     },
     user: {
       role: 'guest',
